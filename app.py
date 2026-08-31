@@ -55,6 +55,49 @@ st.set_page_config(
 # Custom Modern Glassmorphism & Gradient SaaS CSS
 st.markdown(f"""
 <style>
+    /* Hide Default Streamlit Header, Fork button, GitHub icon, 3-dots menu & Viewer Badges */
+    #MainMenu {{
+        visibility: hidden !important;
+        display: none !important;
+    }}
+    header {{
+        visibility: hidden !important;
+        display: none !important;
+        height: 0px !important;
+    }}
+    footer {{
+        visibility: hidden !important;
+        display: none !important;
+        height: 0px !important;
+    }}
+    [data-testid="stHeader"] {{
+        visibility: hidden !important;
+        display: none !important;
+        height: 0px !important;
+    }}
+    [data-testid="stToolbar"] {{
+        visibility: hidden !important;
+        display: none !important;
+    }}
+    [data-testid="stDecoration"] {{
+        visibility: hidden !important;
+        display: none !important;
+        height: 0px !important;
+    }}
+    [data-testid="stStatusWidget"] {{
+        visibility: hidden !important;
+        display: none !important;
+    }}
+    [data-testid="manage-app-button"] {{
+        display: none !important;
+    }}
+    div[class*="viewerBadge"], .viewerBadge_container__1QSob, .viewerBadge_link__1S137 {{
+        display: none !important;
+    }}
+    div[class*="ProfileAvatar"] {{
+        display: none !important;
+    }}
+
     /* Full App Background */
     [data-testid="stAppViewContainer"], .stApp {{
         {BG_CSS}
@@ -63,10 +106,7 @@ st.markdown(f"""
         background-repeat: no-repeat !important;
         background-attachment: fixed !important;
         color: #F8FAFC !important;
-    }}
-    
-    [data-testid="stHeader"] {{
-        background-color: transparent !important;
+        padding-top: 0px !important;
     }}
 
     /* Sidebar Glassmorphism */
