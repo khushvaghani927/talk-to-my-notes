@@ -304,15 +304,15 @@ st.markdown(f"""
         font-weight: 600;
     }}
     .quota-card {{
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(56, 229, 255, 0.35) !important;
         border-radius: 10px;
-        padding: 12px;
+        padding: 14px;
         margin-bottom: 14px;
-        color: #F8FAFC !important;
+        color: #FFFFFF !important;
     }}
     .locked-card {{
-        background: rgba(239, 68, 68, 0.12) !important;
+        background: rgba(239, 68, 68, 0.15) !important;
         border-left: 4px solid #EF4444 !important;
         border-radius: 0 12px 12px 0;
         padding: 18px;
@@ -339,6 +339,112 @@ st.markdown(f"""
         color: white;
         text-decoration: none;
         transform: translateY(-1px);
+    }}
+
+    /* Universal High-Contrast Text for Sidebar & Labels */
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {{
+        color: #FFFFFF !important;
+    }}
+
+    /* Expander Styling */
+    [data-testid="stExpander"] {{
+        background: rgba(10, 35, 55, 0.85) !important;
+        border: 1px solid rgba(56, 229, 255, 0.4) !important;
+        border-radius: 12px !important;
+        margin-bottom: 16px !important;
+    }}
+    [data-testid="stExpander"] details summary {{
+        color: #38E5FF !important;
+        font-weight: 700 !important;
+        background: rgba(56, 229, 255, 0.12) !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+    }}
+    [data-testid="stExpander"] details summary svg {{
+        fill: #38E5FF !important;
+        color: #38E5FF !important;
+    }}
+
+    /* File Uploader Dropzone Styling */
+    [data-testid="stFileUploader"] section {{
+        background-color: rgba(10, 35, 55, 0.85) !important;
+        border: 1.5px dashed rgba(56, 229, 255, 0.5) !important;
+        border-radius: 12px !important;
+        padding: 18px 14px !important;
+    }}
+    [data-testid="stFileUploader"] section:hover {{
+        border-color: #38E5FF !important;
+        background-color: rgba(15, 45, 75, 0.95) !important;
+    }}
+    [data-testid="stFileUploader"] section button {{
+        background: linear-gradient(135deg, #00C0FA 0%, #0077C0 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        box-shadow: 0 4px 12px rgba(0, 192, 250, 0.35) !important;
+    }}
+    [data-testid="stFileUploader"] section button * {{
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }}
+    [data-testid="stFileUploader"] section button:hover {{
+        background: linear-gradient(135deg, #38E5FF 0%, #008DDA 100%) !important;
+        border-color: #38E5FF !important;
+    }}
+    [data-testid="stFileUploader"] section button:hover * {{
+        color: #031B2C !important;
+    }}
+    [data-testid="stFileUploaderDropzoneInstructions"] * {{
+        color: #E0F2FE !important;
+        font-weight: 500 !important;
+    }}
+    [data-testid="stFileUploaderDropzoneInstructions"] small {{
+        color: #94A3B8 !important;
+    }}
+    [data-testid="stFileUploaderFile"] {{
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(56, 229, 255, 0.3) !important;
+        border-radius: 8px !important;
+    }}
+    [data-testid="stFileUploaderFile"] * {{
+        color: #FFFFFF !important;
+    }}
+
+    /* Inputs, Selectboxes, and Labels */
+    .stTextInput label, .stSelectbox label, .stFileUploader label {{
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.5) !important;
+    }}
+    .stTextInput input {{
+        background-color: #FFFFFF !important;
+        color: #031B2C !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+    }}
+    .stSelectbox div[data-baseweb="select"] > div {{
+        background-color: #FFFFFF !important;
+        color: #031B2C !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+    }}
+    .stSelectbox div[data-baseweb="select"] * {{
+        color: #031B2C !important;
+    }}
+
+    /* Progress bar color */
+    .stProgress > div > div > div > div {{
+        background: linear-gradient(90deg, #38E5FF 0%, #00C0FA 100%) !important;
+    }}
+    .stProgress > div > div > div {{
+        background-color: rgba(255, 255, 255, 0.2) !important;
     }}
 
     /* Crisp High-Contrast Streamlit Buttons */
@@ -685,21 +791,21 @@ with st.sidebar:
         st.markdown(f"""
         <div class="premium-badge">
             👑 <b>{user.get('name', 'Student')}</b> (⭐ Premium VIP)<br>
-            <span style="font-size:0.82rem; color:#78350F;">♾️ Unlimited Daily Questions</span>
+            <span style="font-size:0.85rem; color:#FEF08A; font-weight:600;">♾️ Unlimited Daily Questions</span>
         </div>
         """, unsafe_allow_html=True)
     elif is_guest:
         st.markdown(f"""
         <div class="guest-badge">
             👤 <b>Guest Student</b> (Preview Mode)<br>
-            <span style="font-size:0.82rem; color:#6B7280;">3 Free Demo Questions</span>
+            <span style="font-size:0.85rem; color:#E0F2FE; font-weight:500;">3 Free Demo Questions</span>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div class="user-badge">
             👤 <b>{user.get('name', 'Student')}</b> (Free Student Plan)<br>
-            <span style="font-size:0.82rem; color:#6B7280;">{user.get('email', '')}</span>
+            <span style="font-size:0.85rem; color:#E0F2FE; font-weight:500;">{user.get('email', '')}</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -727,8 +833,8 @@ with st.sidebar:
         title_txt = "⚡ Guest Demo Quota" if is_guest else "⚡ Daily Questions Quota"
         st.markdown(f"""
         <div class="quota-card">
-            <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 4px;">{title_txt}</div>
-            <div style="font-size: 0.88rem; color: #4B5563; margin-bottom: 6px;"><b>{queries_used} / {active_limit}</b> questions used</div>
+            <div style="font-weight: 700; font-size: 1rem; color: #38E5FF; margin-bottom: 4px;">{title_txt}</div>
+            <div style="font-size: 0.92rem; color: #FFFFFF; margin-bottom: 6px;"><b>{queries_used} / {active_limit}</b> questions used</div>
         </div>
         """, unsafe_allow_html=True)
         st.progress(pct)
@@ -738,7 +844,7 @@ with st.sidebar:
             else:
                 st.warning("🔒 0 questions left today. Redeem a promo code below for unlimited access!")
         else:
-            st.caption(f"✨ **{queries_left}** questions remaining.")
+            st.markdown(f"<div style='color: #38E5FF; font-size: 0.9rem; font-weight: 700; margin-top: 6px;'>✨ {queries_left} questions remaining.</div>", unsafe_allow_html=True)
     else:
         st.success("⭐ **Premium Active**: Unlimited questions per day!")
 
