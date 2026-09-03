@@ -366,14 +366,18 @@ st.markdown("""
         border-color: #38BDF8 !important;
         box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
     }
-    .stSelectbox div[data-baseweb="select"] > div {
+    [data-testid="stSelectbox"] div[data-baseweb="select"] {
         background-color: #161B22 !important;
-        color: #FFFFFF !important;
         border: 1px solid #30363D !important;
         border-radius: 8px !important;
     }
-    .stSelectbox div[data-baseweb="select"] * {
+    [data-testid="stSelectbox"] div[data-baseweb="select"] * {
+        background-color: transparent !important;
         color: #FFFFFF !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stSelectbox"] svg {
+        fill: #38BDF8 !important;
     }
 
     /* Expander in Dark Theme */
@@ -419,6 +423,28 @@ st.markdown("""
     [data-testid="stFileUploaderDropzoneInstructions"] * {
         color: #E2E8F0 !important;
     }
+    [data-testid="stFileUploaderFile"] {
+        background-color: #161B22 !important;
+        border: 1px solid #30363D !important;
+        border-radius: 8px !important;
+    }
+    [data-testid="stFileUploaderFile"] * {
+        color: #FFFFFF !important;
+    }
+    [data-testid="stFileUploaderFile"] svg {
+        fill: #38BDF8 !important;
+    }
+
+    /* Tags, Source Pills & Badges */
+    span[data-baseweb="tag"], div[data-baseweb="tag"] {
+        background-color: #1E293B !important;
+        border: 1px solid #38BDF8 !important;
+        border-radius: 6px !important;
+    }
+    span[data-baseweb="tag"] * {
+        color: #38BDF8 !important;
+        font-weight: 700 !important;
+    }
 
     /* Progress bar */
     .stProgress > div > div > div > div {
@@ -449,16 +475,25 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* Chat Input Area */
+    /* Chat Input Area & Bottom Container */
+    [data-testid="stBottom"], [data-testid="stBottom"] > div {
+        background: #0B0F19 !important;
+        background-color: #0B0F19 !important;
+        border: none !important;
+    }
     [data-testid="stChatInput"] {
-        background-color: transparent !important;
+        background-color: #161B22 !important;
+        border: 1px solid #38BDF8 !important;
+        border-radius: 14px !important;
     }
     [data-testid="stChatInput"] textarea {
-        background-color: #161B22 !important;
+        background-color: transparent !important;
         color: #FFFFFF !important;
-        border: 1px solid #38BDF8 !important;
-        border-radius: 12px !important;
+        font-size: 1rem !important;
         font-weight: 500 !important;
+    }
+    [data-testid="stChatInput"] textarea::placeholder {
+        color: #94A3B8 !important;
     }
 </style>
 """, unsafe_allow_html=True)
