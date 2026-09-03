@@ -27,8 +27,24 @@ DEFAULT_TEMPERATURE = 0.2
 GUEST_FREE_QUESTION_LIMIT = 3
 DAILY_FREE_QUESTION_LIMIT = 10
 
-# Preload API Key from environment
-API_KEY = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
+# Robust API Key Resolver (Checks Streamlit Cloud secrets first, then .env)
+def get_gemini_api_key() -> str:
+    try:
+        if hasattr(st, "secrets"):
+            if "GEMINI_API_KEY" in st.secrets:
+                val = str(st.secrets["GEMINI_API_KEY"]).strip().strip('"').strip("'")
+                if val and val != "YOUR_GEMINI_API_KEY":
+                    return val
+            if "GOOGLE_API_KEY" in st.secrets:
+                val = str(st.secrets["GOOGLE_API_KEY"]).strip().strip('"').strip("'")
+                if val and val != "YOUR_GEMINI_API_KEY":
+                    return val
+    except Exception:
+        pass
+    val = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
+    return val.strip().strip('"').strip("'")
+
+API_KEY = get_gemini_api_key()
 
 # Helper to encode background image as Base64
 def get_background_css():
@@ -52,444 +68,398 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Modern Glassmorphism & Gradient SaaS CSS
-st.markdown(f"""
+# Custom Modern Dark SaaS CSS with Luminous High-Contrast Typography
+st.markdown("""
 <style>
-    /* Hide Default Streamlit Header, Fork button, GitHub icon, 3-dots menu & Viewer Badges */
-    #MainMenu {{
-        visibility: hidden !important;
-        display: none !important;
-    }}
-    header {{
-        visibility: hidden !important;
-        display: none !important;
-        height: 0px !important;
-    }}
-    footer {{
-        visibility: hidden !important;
-        display: none !important;
-        height: 0px !important;
-    }}
-    [data-testid="stHeader"] {{
-        visibility: hidden !important;
-        display: none !important;
-        height: 0px !important;
-    }}
-    [data-testid="stToolbar"] {{
-        visibility: hidden !important;
-        display: none !important;
-    }}
-    [data-testid="stDecoration"] {{
-        visibility: hidden !important;
-        display: none !important;
-        height: 0px !important;
-    }}
-    [data-testid="stStatusWidget"] {{
-        visibility: hidden !important;
-        display: none !important;
-    }}
-    [data-testid="manage-app-button"] {{
-        display: none !important;
-    }}
-    div[class*="viewerBadge"], .viewerBadge_container__1QSob, .viewerBadge_link__1S137 {{
-        display: none !important;
-    }}
-    div[class*="ProfileAvatar"] {{
-        display: none !important;
-    }}
-
-    /* Full App Background */
-    [data-testid="stAppViewContainer"], .stApp {{
-        {BG_CSS}
-        background-size: cover !important;
-        background-position: center !important;
-        background-repeat: no-repeat !important;
-        background-attachment: fixed !important;
+    /* 1. Global Dark Theme & Base Typography */
+    html, body, [data-testid="stAppViewContainer"], .stApp {
+        background: #0B0F19 !important;
+        background-color: #0B0F19 !important;
         color: #F8FAFC !important;
-        padding-top: 0px !important;
-    }}
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
 
-    /* Sidebar Glassmorphism */
-    [data-testid="stSidebar"] {{
-        background: rgba(5, 25, 40, 0.88) !important;
-        backdrop-filter: blur(20px) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-    }}
+    /* Universal Text Color: Pure White & High-Contrast Light Slate */
+    p, span, div, li, strong, b, em, label, h1, h2, h3, h4, h5, h6 {
+        color: #F8FAFC !important;
+    }
 
-    /* Navbar styling */
-    .nav-container {{
+    /* Hide Default Streamlit Header, Fork button, GitHub icon, 3-dots menu & Viewer Badges */
+    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"],
+    [data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="manage-app-button"],
+    div[class*="viewerBadge"], .viewerBadge_container__1QSob, .viewerBadge_link__1S137, div[class*="ProfileAvatar"] {
+        visibility: hidden !important;
+        display: none !important;
+        height: 0px !important;
+    }
+
+    /* 2. Top Navbar Styling */
+    .nav-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 0;
+        padding: 12px 0;
         margin-bottom: 25px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    }}
-    .brand-logo {{
-        font-size: 1.7rem;
+        border-bottom: 1px solid #1E293B;
+    }
+    .brand-logo {
+        font-size: 1.75rem;
         font-weight: 800;
-        color: #FFFFFF;
+        color: #FFFFFF !important;
         letter-spacing: -0.5px;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }}
-    .brand-badge {{
-        background: rgba(56, 229, 255, 0.2);
-        color: #38E5FF;
-        font-size: 0.78rem;
+    }
+    .brand-badge {
+        background: rgba(56, 189, 248, 0.15);
+        color: #38BDF8 !important;
+        font-size: 0.8rem;
         font-weight: 700;
-        padding: 3px 10px;
+        padding: 4px 10px;
         border-radius: 9999px;
         margin-left: 8px;
-        border: 1px solid rgba(56, 229, 255, 0.4);
+        border: 1px solid rgba(56, 189, 248, 0.4);
         vertical-align: middle;
-    }}
-    
-    /* Hero Glassmorphism Box */
-    .hero-box {{
-        background: rgba(255, 255, 255, 0.08) !important;
-        backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* 3. Hero Box (Dark Obsidian with Luminous Cyan Accent) */
+    .hero-box {
+        background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%) !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
         border-radius: 20px !important;
-        padding: 50px 40px !important;
-        color: white !important;
+        padding: 48px 36px !important;
         text-align: center !important;
         margin-bottom: 36px !important;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
-    }}
-    .hero-title {{
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6) !important;
+    }
+    .hero-title {
         font-size: 2.9rem;
         font-weight: 800;
         line-height: 1.15;
         margin-bottom: 16px;
-        color: #FFFFFF;
+        color: #FFFFFF !important;
         letter-spacing: -1px;
-        text-shadow: 0 2px 12px rgba(0,0,0,0.4);
-    }}
-    .hero-subtitle {{
+    }
+    .hero-subtitle {
         font-size: 1.18rem;
-        color: #E0F7FA;
+        color: #CBD5E1 !important;
         max-width: 800px;
         margin: 0 auto;
         line-height: 1.6;
-        text-shadow: 0 1px 4px rgba(0,0,0,0.3);
-    }}
-    
-    /* Feature Glassmorphism Cards */
-    .feature-card {{
-        background: rgba(255, 255, 255, 0.08) !important;
-        backdrop-filter: blur(16px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    }
+
+    /* 4. Feature Cards (Dark Slate with Glowing Cyan Headers) */
+    .feature-card {
+        background: #111827 !important;
+        border: 1px solid #1E293B !important;
         border-radius: 16px !important;
         padding: 28px 24px !important;
         text-align: center !important;
-        color: white !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4) !important;
         height: 100% !important;
-        transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-    }}
-    .feature-card:hover {{
-        transform: translateY(-5px);
-        background: rgba(255, 255, 255, 0.14) !important;
-        box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5) !important;
-    }}
-    .feature-icon {{
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-card:hover {
+        transform: translateY(-4px);
+        border-color: #38BDF8 !important;
+    }
+    .feature-icon {
         font-size: 2.4rem;
         margin-bottom: 14px;
-    }}
-    .feature-title {{
+    }
+    .feature-title {
         font-size: 1.25rem !important;
         font-weight: 700 !important;
-        color: #38E5FF !important;
+        color: #38BDF8 !important;
         margin-bottom: 10px !important;
-        text-shadow: 0 1px 8px rgba(0,0,0,0.3);
-    }}
-    .feature-desc {{
+    }
+    .feature-desc {
         font-size: 0.95rem !important;
-        color: #E2E8F0 !important;
+        color: #CBD5E1 !important;
         line-height: 1.6 !important;
-    }}
+    }
 
-    /* Step Glassmorphism Cards */
-    .step-card {{
-        background: rgba(255, 255, 255, 0.08) !important;
-        backdrop-filter: blur(14px) !important;
-        border: 1px solid rgba(56, 229, 255, 0.3) !important;
+    /* 5. Step Cards */
+    .step-card {
+        background: #111827 !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
         border-radius: 14px !important;
-        padding: 22px 18px !important;
+        padding: 24px 20px !important;
         text-align: center !important;
-        color: white !important;
-        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.4) !important;
         height: 100% !important;
-    }}
-    .step-title {{
-        font-size: 1.15rem !important;
+    }
+    .step-title {
+        font-size: 1.18rem !important;
         font-weight: 700 !important;
-        color: #38E5FF !important;
+        color: #38BDF8 !important;
         margin-bottom: 8px !important;
-        text-shadow: 0 1px 6px rgba(0,0,0,0.3);
-    }}
-    .step-desc {{
-        font-size: 0.92rem !important;
-        color: #E2E8F0 !important;
+    }
+    .step-desc {
+        font-size: 0.94rem !important;
+        color: #CBD5E1 !important;
         line-height: 1.5 !important;
-    }}
+    }
 
-    /* Auth Glassmorphism Card */
-    .auth-card {{
-        background: rgba(8, 25, 40, 0.88) !important;
-        backdrop-filter: blur(25px) !important;
-        border: 1px solid rgba(56, 229, 255, 0.3) !important;
+    /* 6. Auth Modal Card */
+    .auth-card {
+        background: #111827 !important;
+        border: 1px solid rgba(56, 189, 248, 0.35) !important;
         border-radius: 20px !important;
         padding: 36px !important;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
-    }}
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+    }
 
-    .main-title {{
+    /* 7. Headings & Main Layout */
+    .main-title {
         font-size: 2.3rem;
         font-weight: 800;
-        color: #38E5FF !important;
+        color: #38BDF8 !important;
         margin-bottom: 0.2rem;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }}
-    .sub-title {{
+    }
+    .sub-title {
         font-size: 1.05rem;
-        color: #E0F2FE !important;
+        color: #CBD5E1 !important;
         margin-bottom: 1.5rem;
-    }}
-    .stats-card {{
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+    .stats-card {
+        background: #111827 !important;
+        border: 1px solid #1E293B !important;
         border-radius: 10px !important;
         padding: 14px !important;
         margin-top: 10px;
         margin-bottom: 14px;
         color: #F8FAFC !important;
-    }}
-    .info-card {{
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-left: 4px solid #38E5FF !important;
+    }
+    .info-card {
+        background: #0F172A !important;
+        border-left: 4px solid #38BDF8 !important;
         border-radius: 0 12px 12px 0;
         padding: 20px !important;
         margin-bottom: 20px;
         color: #F8FAFC !important;
-    }}
-    .user-badge {{
-        background: rgba(56, 229, 255, 0.15) !important;
-        border: 1px solid rgba(56, 229, 255, 0.4) !important;
+    }
+
+    /* 8. Sidebar Dark Theme */
+    [data-testid="stSidebar"] {
+        background: #0D1117 !important;
+        background-color: #0D1117 !important;
+        border-right: 1px solid #1E293B !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #F8FAFC !important;
+    }
+
+    /* User Profile Badges in Sidebar */
+    .user-badge {
+        background: rgba(56, 189, 248, 0.12) !important;
+        border: 1px solid rgba(56, 189, 248, 0.4) !important;
         border-radius: 10px;
-        padding: 10px 12px;
+        padding: 12px 14px;
         margin-bottom: 12px;
         font-size: 0.95rem;
-        color: #E0F7FA !important;
-        font-weight: 500;
-    }}
-    .guest-badge {{
-        background: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: #FFFFFF !important;
+        font-weight: 600;
+    }
+    .guest-badge {
+        background: #161B22 !important;
+        border: 1px solid #30363D !important;
         border-radius: 10px;
-        padding: 10px 12px;
+        padding: 12px 14px;
         margin-bottom: 12px;
         font-size: 0.95rem;
-        color: #E2E8F0 !important;
-        font-weight: 500;
-    }}
-    .premium-badge {{
-        background: linear-gradient(135deg, rgba(254, 243, 199, 0.25) 0%, rgba(253, 230, 138, 0.25) 100%) !important;
+        color: #FFFFFF !important;
+        font-weight: 600;
+    }
+    .premium-badge {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%) !important;
         border: 1px solid #F59E0B !important;
         border-radius: 10px;
-        padding: 10px 12px;
+        padding: 12px 14px;
         margin-bottom: 12px;
         font-size: 0.95rem;
         color: #FDE68A !important;
-        font-weight: 600;
-    }}
-    .quota-card {{
-        background: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(56, 229, 255, 0.35) !important;
+        font-weight: 700;
+    }
+    .quota-card {
+        background: #161B22 !important;
+        border: 1px solid #30363D !important;
         border-radius: 10px;
         padding: 14px;
         margin-bottom: 14px;
         color: #FFFFFF !important;
-    }}
-    .locked-card {{
+    }
+    .locked-card {
         background: rgba(239, 68, 68, 0.15) !important;
         border-left: 4px solid #EF4444 !important;
         border-radius: 0 12px 12px 0;
         padding: 18px;
         margin: 16px 0;
         color: #FEE2E2 !important;
-    }}
-    .google-btn {{
-        display: block;
-        width: 100%;
-        background-color: #4285F4;
-        color: white;
-        text-align: center;
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 1rem;
-        text-decoration: none;
-        margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
-        transition: background-color 0.2s, transform 0.1s;
-    }}
-    .google-btn:hover {{
-        background-color: #3367D6;
-        color: white;
-        text-decoration: none;
-        transform: translateY(-1px);
-    }}
+    }
 
-    /* Universal High-Contrast Text for Sidebar & Labels */
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3 {{
+    /* 9. Buttons (Crisp Luminous Dark Style) */
+    .stButton > button {
+        background: #161B22 !important;
         color: #FFFFFF !important;
-    }}
-
-    /* Expander Styling */
-    [data-testid="stExpander"] {{
-        background: rgba(10, 35, 55, 0.85) !important;
-        border: 1px solid rgba(56, 229, 255, 0.4) !important;
-        border-radius: 12px !important;
-        margin-bottom: 16px !important;
-    }}
-    [data-testid="stExpander"] details summary {{
-        color: #38E5FF !important;
-        font-weight: 700 !important;
-        background: rgba(56, 229, 255, 0.12) !important;
-        border-radius: 10px !important;
-        padding: 10px 14px !important;
-    }}
-    [data-testid="stExpander"] details summary svg {{
-        fill: #38E5FF !important;
-        color: #38E5FF !important;
-    }}
-
-    /* File Uploader Dropzone Styling */
-    [data-testid="stFileUploader"] section {{
-        background-color: rgba(10, 35, 55, 0.85) !important;
-        border: 1.5px dashed rgba(56, 229, 255, 0.5) !important;
-        border-radius: 12px !important;
-        padding: 18px 14px !important;
-    }}
-    [data-testid="stFileUploader"] section:hover {{
-        border-color: #38E5FF !important;
-        background-color: rgba(15, 45, 75, 0.95) !important;
-    }}
-    [data-testid="stFileUploader"] section button {{
-        background: linear-gradient(135deg, #00C0FA 0%, #0077C0 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        border-radius: 8px !important;
-        padding: 8px 16px !important;
-        box-shadow: 0 4px 12px rgba(0, 192, 250, 0.35) !important;
-    }}
-    [data-testid="stFileUploader"] section button * {{
-        color: #FFFFFF !important;
-        font-weight: 700 !important;
-    }}
-    [data-testid="stFileUploader"] section button:hover {{
-        background: linear-gradient(135deg, #38E5FF 0%, #008DDA 100%) !important;
-        border-color: #38E5FF !important;
-    }}
-    [data-testid="stFileUploader"] section button:hover * {{
-        color: #031B2C !important;
-    }}
-    [data-testid="stFileUploaderDropzoneInstructions"] * {{
-        color: #E0F2FE !important;
-        font-weight: 500 !important;
-    }}
-    [data-testid="stFileUploaderDropzoneInstructions"] small {{
-        color: #94A3B8 !important;
-    }}
-    [data-testid="stFileUploaderFile"] {{
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(56, 229, 255, 0.3) !important;
-        border-radius: 8px !important;
-    }}
-    [data-testid="stFileUploaderFile"] * {{
-        color: #FFFFFF !important;
-    }}
-
-    /* Inputs, Selectboxes, and Labels */
-    .stTextInput label, .stSelectbox label, .stFileUploader label {{
-        color: #FFFFFF !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        text-shadow: 0 1px 4px rgba(0,0,0,0.5) !important;
-    }}
-    .stTextInput input {{
-        background-color: #FFFFFF !important;
-        color: #031B2C !important;
-        font-weight: 600 !important;
-        border-radius: 8px !important;
-    }}
-    .stSelectbox div[data-baseweb="select"] > div {{
-        background-color: #FFFFFF !important;
-        color: #031B2C !important;
-        font-weight: 600 !important;
-        border-radius: 8px !important;
-    }}
-    .stSelectbox div[data-baseweb="select"] * {{
-        color: #031B2C !important;
-    }}
-
-    /* Progress bar color */
-    .stProgress > div > div > div > div {{
-        background: linear-gradient(90deg, #38E5FF 0%, #00C0FA 100%) !important;
-    }}
-    .stProgress > div > div > div {{
-        background-color: rgba(255, 255, 255, 0.2) !important;
-    }}
-
-    /* Crisp High-Contrast Streamlit Buttons */
-    .stButton > button {{
-        background: rgba(10, 35, 55, 0.85) !important;
-        color: #FFFFFF !important;
-        border: 1px solid rgba(56, 229, 255, 0.5) !important;
+        border: 1px solid #30363D !important;
         border-radius: 10px !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         transition: all 0.2s ease !important;
-    }}
-    .stButton > button p, .stButton > button span {{
+    }
+    .stButton > button p, .stButton > button span {
         color: #FFFFFF !important;
         font-weight: 700 !important;
-    }}
-    .stButton > button:hover {{
-        background: #38E5FF !important;
-        border-color: #38E5FF !important;
-        box-shadow: 0 6px 18px rgba(56, 229, 255, 0.5) !important;
+    }
+    .stButton > button:hover {
+        background: #38BDF8 !important;
+        border-color: #38BDF8 !important;
         transform: translateY(-1px) !important;
-    }}
-    .stButton > button:hover p, .stButton > button:hover span {{
+    }
+    .stButton > button:hover p, .stButton > button:hover span {
         color: #031B2C !important;
-    }}
+    }
 
-    /* Primary Accent Buttons */
-    .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {{
-        background: linear-gradient(135deg, #00C0FA 0%, #0077C0 100%) !important;
+    /* Primary Buttons (Cyan Gradient) */
+    .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {
+        background: linear-gradient(135deg, #0284C7 0%, #2563EB 100%) !important;
         color: #FFFFFF !important;
-        border: 1px solid rgba(255, 255, 255, 0.35) !important;
-        box-shadow: 0 4px 15px rgba(0, 192, 250, 0.4) !important;
-    }}
-    .stButton > button[kind="primary"] p, .stButton > button[data-testid="baseButton-primary"] p {{
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4) !important;
+    }
+    .stButton > button[kind="primary"] p, .stButton > button[data-testid="baseButton-primary"] p {
         color: #FFFFFF !important;
         font-weight: 800 !important;
-    }}
-    .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {{
-        background: linear-gradient(135deg, #38E5FF 0%, #00A8FF 100%) !important;
-        box-shadow: 0 6px 20px rgba(56, 229, 255, 0.6) !important;
-    }}
-    .stButton > button[kind="primary"]:hover p, .stButton > button[data-testid="baseButton-primary"]:hover p {{
+    }
+    .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {
+        background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%) !important;
+    }
+    .stButton > button[kind="primary"]:hover p, .stButton > button[data-testid="baseButton-primary"]:hover p {
         color: #031B2C !important;
-    }}
+    }
+
+    /* Google Sign-in Button */
+    .google-btn {
+        display: block;
+        width: 100%;
+        background-color: #4285F4;
+        color: white !important;
+        text-align: center;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        text-decoration: none;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+    }
+
+    /* 10. Form Inputs, TextAreas & SelectBoxes */
+    .stTextInput input, .stTextArea textarea {
+        background-color: #161B22 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #30363D !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+    }
+    .stTextInput input:focus, .stTextArea textarea:focus {
+        border-color: #38BDF8 !important;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+    }
+    .stSelectbox div[data-baseweb="select"] > div {
+        background-color: #161B22 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #30363D !important;
+        border-radius: 8px !important;
+    }
+    .stSelectbox div[data-baseweb="select"] * {
+        color: #FFFFFF !important;
+    }
+
+    /* Expander in Dark Theme */
+    [data-testid="stExpander"] {
+        background: #161B22 !important;
+        border: 1px solid #30363D !important;
+        border-radius: 12px !important;
+        margin-bottom: 16px !important;
+    }
+    [data-testid="stExpander"] details summary {
+        color: #38BDF8 !important;
+        font-weight: 700 !important;
+        background: rgba(56, 189, 248, 0.08) !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+    }
+    [data-testid="stExpander"] details summary svg {
+        fill: #38BDF8 !important;
+        color: #38BDF8 !important;
+    }
+
+    /* File Uploader in Dark Theme */
+    [data-testid="stFileUploader"] section {
+        background-color: #161B22 !important;
+        border: 1.5px dashed rgba(56, 189, 248, 0.5) !important;
+        border-radius: 12px !important;
+        padding: 18px 14px !important;
+    }
+    [data-testid="stFileUploader"] section:hover {
+        border-color: #38BDF8 !important;
+        background-color: #1F2937 !important;
+    }
+    [data-testid="stFileUploader"] section button {
+        background: linear-gradient(135deg, #0284C7 0%, #2563EB 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+    }
+    [data-testid="stFileUploader"] section button * {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+    [data-testid="stFileUploaderDropzoneInstructions"] * {
+        color: #E2E8F0 !important;
+    }
+
+    /* Progress bar */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #38BDF8 0%, #2563EB 100%) !important;
+    }
+    .stProgress > div > div > div {
+        background-color: #1E293B !important;
+    }
+
+    /* Chat Messages in Dark Theme */
+    [data-testid="stChatMessage"] {
+        background-color: #161B22 !important;
+        border: 1px solid #30363D !important;
+        border-radius: 14px !important;
+        color: #FFFFFF !important;
+        padding: 16px !important;
+        margin-bottom: 14px !important;
+    }
+    [data-testid="stChatMessage"] * {
+        color: #F8FAFC !important;
+    }
+    [data-testid="stChatMessage"] h1, [data-testid="stChatMessage"] h2, [data-testid="stChatMessage"] h3 {
+        color: #38BDF8 !important;
+        font-weight: 700 !important;
+    }
+    [data-testid="stChatMessage"] strong, [data-testid="stChatMessage"] b {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    /* Chat Input Area */
+    [data-testid="stChatInput"] {
+        background-color: transparent !important;
+    }
+    [data-testid="stChatInput"] textarea {
+        background-color: #161B22 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #38BDF8 !important;
+        border-radius: 12px !important;
+        font-weight: 500 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1076,11 +1046,12 @@ else:
                             k=DEFAULT_TOP_K
                         )
 
+                        active_key = get_gemini_api_key()
                         result = generate_answer(
                             query=user_prompt,
                             retrieved_docs_with_scores=retrieved_docs_with_scores,
                             provider=DEFAULT_PROVIDER,
-                            api_key=API_KEY,
+                            api_key=active_key,
                             explanation_style=explanation_style
                         )
 
@@ -1114,4 +1085,8 @@ else:
                         st.rerun()
 
                     except Exception as e:
-                        st.error(f"An error occurred: {str(e)}")
+                        err_str = str(e)
+                        if "API_KEY_INVALID" in err_str or "API key not valid" in err_str or "API_KEY" in err_str:
+                            st.error("🔑 **Invalid Gemini API Key**: Please provide a valid Google Gemini API key (starts with `AIzaSy...`) in your Streamlit Secrets (`share.streamlit.io` -> App Settings -> Secrets) or local `.env` file.")
+                        else:
+                            st.error(f"An error occurred: {err_str}")
