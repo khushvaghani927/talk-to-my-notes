@@ -534,14 +534,30 @@ if "auth_view" not in st.session_state:
     st.session_state.auth_view = "welcome"  # "welcome", "login", "signup"
 
 
+# Helper to determine correct OAuth redirect target
+def get_oauth_redirect_url() -> str:
+    try:
+        if hasattr(st, "secrets") and "REDIRECT_URL" in st.secrets:
+            val = str(st.secrets["REDIRECT_URL"]).strip()
+            if val:
+                return val
+    except Exception:
+        pass
+    val = os.getenv("REDIRECT_URL", "").strip()
+    if val:
+        return val
+    return "https://talk-to-my-notes.streamlit.app"
+
+
 # ==============================================================================
 # HANDLE GOOGLE OAUTH CALLBACK (From Redirect URL)
 # ==============================================================================
 query_params = st.query_params
 if "code" in query_params:
     auth_code = query_params["code"]
+    verifier = st.session_state.get("oauth_verifier")
     with st.spinner("Authenticating with Google..."):
-        oauth_res = supabase_db.handle_oauth_callback(auth_code)
+        oauth_res = supabase_db.handle_oauth_callback(auth_code, code_verifier=verifier)
         if oauth_res["success"]:
             st.session_state.current_user = oauth_res["user"]
             st.session_state.is_premium = oauth_res["user"].get("is_premium", False)
@@ -613,8 +629,12 @@ if st.session_state.current_user is None:
 
             st.markdown('<div class="auth-card">', unsafe_allow_html=True)
             
-            # Google One-Click OAuth
-            google_oauth_url, oauth_verifier = supabase_db.get_google_oauth_url("http://localhost:8501")
+            # Google One-Click OAuth (Dynamic Redirect)
+            redirect_target = get_oauth_redirect_url()
+            google_oauth_url, oauth_verifier = supabase_db.get_google_oauth_url(redirect_target)
+            if oauth_verifier:
+                st.session_state.oauth_verifier = oauth_verifier
+
             if google_oauth_url:
                 st.markdown(
                     f'<a href="{google_oauth_url}" target="_self" class="google-btn">🔵 Continue with Google (Verified Account)</a>',
